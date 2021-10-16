@@ -29,5 +29,15 @@ def tokenizing(articles, tagList, pos='noun'):
             adjective.append(tags)
         return adjective
     
+    elif pos == 'all':
+        all = []
+        for article in articles:
+            tokens = []
+            for tag in article:
+                tokens.append(str(tag[0]))
+            all.append(tokens)
+        return all
+    
     else :
         print("Invalid POS mode! must be one of : 'none', 'verb', 'adjective'")
+        return -1
