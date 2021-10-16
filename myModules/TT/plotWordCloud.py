@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from collections import Counter
-from myModules.analysisTags import merge
+from myModules.TT.analysisTags import merge
 
 def plotWordCloud(data, filepath):
     wc = WordCloud(font_path='C:\\Users\\marti\\AppData\\Local\\Microsoft\\Windows\\Fonts\\윤고딕330.ttf',
