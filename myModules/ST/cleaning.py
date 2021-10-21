@@ -3,7 +3,6 @@ import re
 def lowerCase(text):
     return text.lower()
 
-
 def cleanText(text):
     text = lowerCase(text)
     return re.sub('[^a-z ]', '', text)
