@@ -21,4 +21,5 @@ def topicWords(model, num_topic_words):
 def visualizeLDA(model, Corp, Dict):
     pyLDAvis.enable_notebook()
 
-    return pyLDAvis.gensim_models.prepare(model, Corp, Dict)
+    return pyLDAvis.gensim_models.prepare(topic_model=model, corpus=Corp, dictionary=Dict, mds='mmds')
+    
