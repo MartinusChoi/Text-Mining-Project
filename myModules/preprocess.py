@@ -131,3 +131,23 @@ def tokenizing_TT(articles, tagList, pos='all'):
         return -1
     
 ######################################
+
+def extract_some_pos_ST(articles, tagList, pos_list=['noun', 'pronoun', 'verb', 'adjective']):
+    result = []
+
+    for article in articles:
+        tags = []
+        for tag in article:
+            if 'noun' in pos_list:
+                if tag[1] in tagList.Eng_tag[0]:
+                    tags.append(str(tag[0]))
+            if 'verb' in pos_list:
+                if tag[1] in tagList.Eng_tag[2]:
+                    tags.append(str(tag[0]))
+            if 'adjective' in pos_list:
+                if tag[1] in tagList.Eng_tag[3]:
+                    tags.append(str(tag[0]))
+        result.append(tags)
+    
+    return result
+    
