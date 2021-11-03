@@ -6,6 +6,8 @@ from tqdm.notebook import tqdm
 from konlpy.tag import Kkma
 import nltk
 
+from tensorflow.keras.preprocessing.text import text_to_word_sequence
+
 ############## Cleaning ##############
 
 def lowerCase(text):
@@ -13,7 +15,7 @@ def lowerCase(text):
 
 def cleanST(text):
     text = lowerCase(text)
-    return re.sub('[^a-z ]', '', text)
+    return re.sub("[^a-z'\. ]", " ", text)
 
 def cleanTT(text):
     return re.sub('[^A-Za-z가-힣 ]', '', text)
@@ -129,6 +131,14 @@ def tokenizing_TT(articles, tagList, pos='all'):
     else :
         print("Invalid POS mode! must be one of : 'none', 'verb', 'adjective'")
         return -1
+
+def keras_tokenizer(articles):
+    result = []
+
+    for article in articles:
+        result.append(text_to_word_sequence(article))
+    
+    return result
     
 ######################################
 
