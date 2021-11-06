@@ -157,6 +157,9 @@ def extract_some_pos_ST(articles, tagList, pos_list=['noun', 'pronoun', 'verb', 
             if 'adjective' in pos_list:
                 if tag[1] in tagList.Eng_tag[3]:
                     tags.append(str(tag[0]))
+            if 'adverb' in pos_list:
+                if tag[1] in tagList.Eng_tag[4]:
+                    tags.append(str(tag[0]))
         result.append(tags)
     
     return result
