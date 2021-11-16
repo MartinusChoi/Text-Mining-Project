@@ -1,3 +1,14 @@
+########## merge over period #########
+
+def merge(articles):
+    result = []
+    for article in articles:
+        result.extend(article)
+    return result
+
+####################################
+######### Data Loader ##############
+
 def DataLoader(filePathList, mode):
     texts = []
 
