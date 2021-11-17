@@ -80,8 +80,21 @@ class Network:
         G = nx.Graph()
 
         # node 추가
-        for idx in range(len(self.pgr)):
-            G.add_node(self.pgr[idx][0], weight=self.dgr[idx][1])
+        if centrality == 'degree':
+            for idx in range(len(self.dgr)):
+                G.add_node(self.dgr[idx][0], weight=self.dgr[idx][1])
+        elif centrality == 'closeness':
+            for idx in range(len(self.cls)):
+                G.add_node(self.cls[idx][0], weight=self.cls[idx][1])
+        elif centrality == 'betweenness':
+            for idx in range(len(self.btw)):
+                G.add_node(self.btw[idx][0], weight=self.btw[idx][1])
+        elif centrality == 'eigenvector':
+            for idx in range(len(self.eig)):
+                G.add_node(self.eig[idx][0], weight=self.eig[idx][1])
+        elif centrality == 'pagerank':
+            for idx in range(len(self.pgr)):
+                G.add_node(self.pgr[idx][0], weight=self.pgr[idx][1])
         
         # edge 추가
         for idx in range(self.edge_num):
