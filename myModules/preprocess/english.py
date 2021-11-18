@@ -274,6 +274,10 @@ def to_pickle(data, file_name, root='./'):
     with open(root+file_name+'.pkl', 'wb') as f:
             pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
 
+def to_csv(data, file_name, root='./'):
+    df = pd.DataFrame(data)
+    df.to_csv(root+file_name+'.csv', index=False)
+
 
 class check_pos:
     def __init__(self, data):
