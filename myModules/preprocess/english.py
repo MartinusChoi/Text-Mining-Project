@@ -1,12 +1,12 @@
-############## Moduel Import ##############
+############## Module Import ##############
 
 import re
 from tqdm.notebook import tqdm
 import pickle
 import pandas as pd
 
-from konlpy.tag import Kkma
 import nltk
+import spacy
 
 from tensorflow.keras.preprocessing.text import text_to_word_sequence
 
@@ -240,9 +240,27 @@ def convert_pos(data, key=".", target_pos="NN"):
 
 ######################################
 
+################### POS correction ################
+
+def pos_correction(data, correction_dict):
+    result = []
+
+    for tags in data:
+        corrected = []
+        for token, pos in tags:
+            if token in correction_dict.keys() :
+                corrected.append((token, correction_dict[token]))
+            else : 
+                corrected.append((token, pos))
+        result.append(corrected)
+    
+    return result
+
+##############################################
+
 ############## lemmatization ##############
 
-class lemmatization:
+class lemmatization_nltk:
     def __init__(self, data, lemmatizer, pos_table, allowed_pos=['noun', 'verb', 'adjective', 'adverb']):
         self.data = data
         self.lemmatizer = lemmatizer
@@ -268,6 +286,43 @@ class lemmatization:
             result.append(arr)
         
         return result
+
+class lemmatization_spacy:
+    def __init__(self, data, pos_table, allowed_pos=['noun', 'verb', 'adjective', 'adverb']):
+
+        self.allowed_pos = []
+        for pos in allowed_pos:
+            if pos == 'noun' : self.allowed_pos.extend(pos_table.Eng_tag[0])
+            elif pos == 'verb' : self.allowed_pos.extend(pos_table.Eng_tag[2])
+            elif pos == 'adjective' : self.allowed_pos.extend(pos_table.Eng_tag[3])
+            elif pos == 'adverb' : self.allowed_pos.extend(pos_table.Eng_tag[4])
+        
+        self.data = []
+
+        for tags in data:
+            tokens = []
+            for token, pos in tags : 
+                if pos in self.allowed_pos: tokens.append(token)
+            self.data.append(" ".join(tokens))
+
+        self.nlp_spacy = spacy.load('en_core_web_sm')
+    
+    def lemmatize(self, lemma_dict={'saw' : 'see', 'men' : 'man'}):
+        result = []
+
+        for text in self.data:
+            doc = self.nlp_spacy(text)
+            lemmatized_tokens = []
+            for token in doc:
+                lemma = token.lemma_
+                if lemma in lemma_dict.keys() : lemmatized_tokens.append(lemma_dict[lemma])
+                else : lemmatized_tokens.append(lemma)
+            
+            result.append(lemmatized_tokens)
+        
+        return result
+
+#################################################
 
 
 def to_pickle(data, file_name, root='./'):

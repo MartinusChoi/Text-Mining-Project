@@ -1,8 +1,9 @@
-library(readr)
-library(dplyr)
+library("reticulate")
+py_install("pandas")
 
-DATA_ROOT <- "C:/Text-Mining-Project/processed-data/period-1/lemmatized-all.csv"
+py_install("pickle")
 
-all_1 <- read_csv(DATA_ROOT)
+source_python("read_pickle.py")
+pickle_data <- read_pickle_file("lemmatized-all.pkl")
 
-all_1
+pickle_data
