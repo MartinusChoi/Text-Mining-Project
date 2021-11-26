@@ -2,6 +2,7 @@
 
 import re
 from tqdm.notebook import tqdm
+import pickle
 
 from konlpy.tag import Kkma
 
@@ -24,7 +25,7 @@ def cleaning(data):
 def remove_stopword(data, stop_tag_list, Kor_stopwords):
     result = []
 
-    for tags in tqdm(data):
+    for tags in tqdm(data, desc="Removing Stop Words"):
         arr = []
         for tag in tags:
             if (tag[1] not in stop_tag_list) & (tag[0] not in Kor_stopwords) & (len(tag[0]) != 1):
@@ -42,7 +43,7 @@ def tagging(articles):
 
     kkma = Kkma()
 
-    for article in tqdm(articles):
+    for article in tqdm(articles, desc="POS tagging"):
         result.append(kkma.pos(article))
     
     return result
@@ -106,3 +107,7 @@ def tokenizing(data, tagList, pos='all'):
         return -1
     
 ######################################
+
+def to_pickle(data, file_name, root='./'):
+    with open(root+file_name+'.pkl', 'wb') as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)

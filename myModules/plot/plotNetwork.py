@@ -10,6 +10,8 @@ import pandas as pd
 import operator
 import numpy as np
 from nltk import bigrams, ConditionalFreqDist
+import matplotlib.font_manager as fm
+from matplotlib import rc
 
 class vocaDict:
     def __init__(self):
@@ -49,6 +51,7 @@ class vocaDict:
 ####################################################
 
 ################## Network #########################
+
 
 class Network:
     def __init__(self, data, num_node=30, keywords=[]):
@@ -141,13 +144,21 @@ class Network:
 
         fig = plt.figure(figsize=(30, 20))
         plt.margins(x=0.1, y=0.2)
+        plt.rc('font', family='Malgun Gothic')
+        font_name = fm.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+        rc('font', family=font_name)
         ax = fig.gca()
 
         # edge와 node의 label 부여하기
-        edge_labels = dict(((u, v), d["weight"]) for u, v, d in self.G.edges(data=True))
         node_labels = dict((token, token) for token, _ in self.G.nodes(data=True))
-        pos = graphviz_layout(self.G, prog='neato')
-        nx.draw_networkx_labels(self.G, pos, labels=node_labels)
+        try :
+            pos = graphviz_layout(self.G, prog='neato')
+        except : 
+            pos = nx.layout.fruchterman_reingold_layout(self.G)
+            # pos = nx.shell_layout(self.G)
+            # pos = nx.kamada_kawai_layout(self.G)
+            # pos = nx.random_layout(self.G)
+        nx.draw_networkx_labels(self.G, pos, font_family=font_name, labels=node_labels)
 
         # Node에 centrality에 따라 weight 부여
         Blues_modified = cm.get_cmap('Blues', 256)
