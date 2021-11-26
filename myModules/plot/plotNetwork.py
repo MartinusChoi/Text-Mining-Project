@@ -64,7 +64,7 @@ class Network:
         cfd = ConditionalFreqDist(token)
         freq_mat = []
 
-        for i in tqdm(cfd.keys()):
+        for i in tqdm(cfd.keys(), desc="Generate Frequency Dist"):
             temp = []
             for j in cfd.keys():
                 temp.append(cfd[i][j])
