@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 # NLP
-from konlpy.tag import Kkma
+from soynlp.tokenizer import RegexTokenizer
 
 # Visualization
 import networkx as nx
@@ -20,26 +20,21 @@ import matplotlib.font_manager as fm
 from matplotlib import rc
 
 class TextMining:
-    def __init__(self, text, pos_table_root='./processed-data/pos-table.pkl', kor_stopwords_root='./Data/Kor_stopwords.txt'):
+    def __init__(self, text, kor_stopwords_root='./Data/Kor_stopwords.txt'):
         text = [text]
 
         cleaned = self.cleaning(text)
 
-        tagged = self.tagging(cleaned)
+        tokenizer = RegexTokenizer()
+        tokenized = self.tokenizing(data=cleaned, tokenizer=tokenizer)
 
-        tagList = pd.read_pickle(pos_table_root)
-        stop_tag_list = ['IC', 'JC', 'JK', 'JKC', 'JKG', 'JKI', 'JKM', 'JKO', 'JKQ', 'JKS', 'JX', 'EPH', \
-            'EPT', 'EPP', 'EFN', 'EFQ', 'EFO', 'EFA', 'EFI', 'EFR', 'ECE', 'ECD', 'ECS', 'ETN', 'ETD',
-            'XSN', 'XSV', 'XSA', 'UN', 'OH', 'OL', 'ON', 'XPN', 'XPV', 'XR']
         Kor_stopwords = ''
         with open(kor_stopwords_root, 'r', encoding='utf-8') as f:
             stopword = f.read()
             Kor_stopwords = stopword
         Kor_stopwords = Kor_stopwords.split('\n')
 
-        wo_stopword = self.remove_stopword(tagged, stop_tag_list, Kor_stopwords)
-
-        self.tokenized = self.tokenizing(wo_stopword, tagList, 'noun')
+        self.wo_stopwords = self.remove_stopword(data=tokenized, Kor_stopwords=Kor_stopwords)
     
     def cleaning(self, data):
         result=[]
@@ -49,84 +44,24 @@ class TextMining:
         
         return result
     
-    def tagging(self, articles):
+    def tokenizing(self, data, tokenizer):
         result = []
 
-        kkma = Kkma()
-
-        for article in articles:
-            result.append(kkma.pos(article))
+        for article in data:
+            result.extend(tokenizer.tokenize(article))
         
         return result
     
-    def remove_stopword(self, data, stop_tag_list, Kor_stopwords):
+    def remove_stopword(self, data, Kor_stopwords):
         result = []
 
-        for tags in data:
-            arr = []
-            for tag in tags:
-                if (tag[1] not in stop_tag_list) & (tag[0] not in Kor_stopwords) & (len(tag[0]) != 1):
-                    arr.append(tag)
-            result.append(arr)
-
+        for token in data:
+            if (token not in Kor_stopwords) & (len(token) != 1): result.append(token)
+        
         return result
-    
-    def tokenizing(self, data, tagList, pos='all'):
-        if pos == 'noun':
-            nouns = []
-            for article in data:
-                tags = []
-                for tag in article:
-                    if tag[1] in tagList.Kor_tag[0]:
-                        tags.append(str(tag[0]))
-                nouns.append(tags)
-            return nouns
-        
-        elif pos == 'verb':
-            verb=[]
-            for article in data:
-                tags = []
-                for tag in article:
-                    if tag[1] in tagList.Kor_tag[2]:
-                        tags.append(str(tag[0]))
-                verb.append(tags)
-            return verb
-        
-        elif pos == 'adjective':
-            adjective = []
-            for article in data:
-                tags = []
-                for tag in article:
-                    if tag[1] in tagList.Kor_tag[3]:
-                        tags.append(str(tag[0]))
-                adjective.append(tags)
-            return adjective
-        
-        elif pos == 'adverb':
-            adverb = []
-            for article in data:
-                tags = []
-                for tag in article:
-                    if tag[1] in tagList.Kor_tag[4]:
-                        tags.append(str(tag[0]))
-                adverb.append(tags)
-            return adverb            
-        
-        elif pos == 'all':
-            all = []
-            for article in data:
-                tokens = []
-                for tag in article:
-                    tokens.append(str(tag[0]))
-                all.append(tokens)
-            return all
-        
-        else :
-            print("Invalid POS mode! must be one of : 'noun', 'verb', 'adjective', 'adverb', 'all'")
-            return -1
     
     def gen_Network(self):
-        bgrams = [bigrams(tokens) for tokens in self.tokenized]
+        bgrams = [bigrams(self.wo_stopwords)]
 
         token = []
         for bgram in bgrams:
@@ -162,9 +97,6 @@ class TextMining:
 
         btw = nx.betweenness_centrality(self.G)
         self.btw = sorted(btw.items(), key=operator.itemgetter(1), reverse=True)
-
-        eig = nx.eigenvector_centrality(self.G)
-        self.eig = sorted(eig.items(), key=operator.itemgetter(1), reverse=True)
     
     def save_Network(self, title='Semantic Analysis', root='./', centrality='degree'):
         if centrality == 'degree':
@@ -176,9 +108,6 @@ class TextMining:
         elif centrality == 'betweenness':
             title = title + ' (Betweenness Centrality)'
             centrality_value = self.btw
-        elif centrality == 'eigenvector':
-            title = title + ' (Eigenvector Centrality)'
-            centrality_value = self.eig
 
         for token, central in centrality_value:
             self.G.nodes[token]['weight'] = central
@@ -239,11 +168,10 @@ class TextMining:
         dgr_df = pd.DataFrame(self.dgr)
         cls_df = pd.DataFrame(self.cls)
         btw_df = pd.DataFrame(self.btw)
-        eig_df = pd.DataFrame(self.eig)
-        centrality_df = pd.concat([dgr_df, cls_df, btw_df, eig_df], axis=1)
+        centrality_df = pd.concat([dgr_df, cls_df, btw_df], axis=1)
         centrality_df.columns = ['Word', 'Degree Centrality', 'Word', 'Closeness Centrality', \
-            'Word', 'Betweenness Centrality', 'Word', 'Eigenvector Centrality']
-        centrality_df[:table_len].to_csv(root+title+'.csv')
+            'Word', 'Betweenness Centrality']
+        centrality_df[:table_len].to_csv(root+title+'.csv', index=False)
 
 
 
@@ -292,7 +220,6 @@ if __name__ == '__main__':
     text_mining.save_Network(centrality='degree', root='./')
     text_mining.save_Network(centrality='closeness', root='./')
     text_mining.save_Network(centrality='betweenness', root='./')
-    text_mining.save_Network(centrality='eigenvector', root='./')
 
     # 각 Centrality 별로 값이 높은 상위 10개의 어휘들을 찾아 csv 파일로 저장
     # 웹 상에 table 형태로 시각화 하면 좋을 듯!
